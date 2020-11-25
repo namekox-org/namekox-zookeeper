@@ -41,7 +41,7 @@ ZOOKEEPER:
   ping:
     hosts: 127.0.0.1:2181
 WEBSERVER:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 80
 ```
 > namekox run ping
@@ -95,7 +95,7 @@ ZOOKEEPER:
   ping:
     hosts: 127.0.0.1:2181
 WEBSERVER:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 80
 ```
 > namekox shell
