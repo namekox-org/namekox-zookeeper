@@ -21,7 +21,7 @@ class ZooKeeperProxy(object):
     def __call__(self, dbname, **options):
         self.options.update(options)
         config = self.configs[dbname].copy()
-        config.update(options)
+        config.update(self.options)
         self.client = KazooClient(**config)
         self.client.start()
         return self.client
