@@ -9,6 +9,7 @@ import socket
 
 
 from kazoo.client import KazooClient
+from namekox_core.core.friendly import AsLazyProperty
 from namekox_core.core.generator import generator_uuid
 from namekox_core.core.friendly import ignore_exception
 from namekox_core.core.service.dependency import Dependency
@@ -16,8 +17,8 @@ from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY, DEFAULT_ZOOKEEPER_
 
 
 class ZooKeeperHelper(Dependency):
-    def __init__(self, dbname, s_ipport=None, s_weight=0, watching=None, allotter=None, **configs):
-        self.configs = configs
+    def __init__(self, dbname, s_ipport=None, s_weight=0, watching=None, allotter=None, **options):
+        self.options = options
         self.services = {}
         self.instance = None
         self.dbname = dbname
@@ -26,7 +27,11 @@ class ZooKeeperHelper(Dependency):
         self.watching = watching
         self.allotter = allotter
         self.callback = lambda children: self.set_zk_service()
-        super(ZooKeeperHelper, self).__init__(dbname, s_ipport, s_weight, watching, allotter, **configs)
+        super(ZooKeeperHelper, self).__init__(dbname, s_ipport, s_weight, watching, allotter, **options)
+
+    @AsLazyProperty
+    def configs(self):
+        return self.container.config.get(ZOOKEEPER_CONFIG_KEY, {})
 
     @staticmethod
     def get_host_byname():
@@ -64,11 +69,11 @@ class ZooKeeperHelper(Dependency):
         self.instance.create(base_path, host_info, ephemeral=True)
 
     def setup(self):
-        config = self.container.config.get(ZOOKEEPER_CONFIG_KEY, {}).get(self.dbname, {}).copy()
-        [config.update({k: v}) for k, v in six.iteritems(self.configs)]
+        config = self.configs.get(self.dbname, {}).copy()
+        [config.update({k: v}) for k, v in six.iteritems(self.options)]
         self.instance = KazooClient(**config)
         self.watching and self.setup_watching()
-        self.configs = config
+        self.options = config
 
     def start(self):
         self.instance and self.instance.start()
