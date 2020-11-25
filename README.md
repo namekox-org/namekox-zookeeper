@@ -24,7 +24,7 @@ class Ping(object):
         name,
         s_ipport='10.242.154.205:80',
         s_weight=0,
-        allotter=Allotter(data={}),
+        allotter=Allotter(),
         watching=DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH
     )
 
