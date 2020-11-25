@@ -7,9 +7,9 @@ from itertools import cycle
 
 
 class Allotter(object):
-    def __init__(self, data):
+    def __init__(self, data=None):
         self.iters = {}
-        self.items = data
+        self.items = data or {}
 
     def get(self, name):
         data = self.items[name]
