@@ -50,7 +50,7 @@ class ZooKeeperHelper(Dependency):
                 continue
             nservices[name].append(data)
         self.services = nservices
-        self.allotter and self.allotter.set(nservices)
+        self.allotter and self.allotter.set(self)
 
     def setup_watching(self):
         self.callback = self.instance.ChildrenWatch(self.watching)(self.callback)

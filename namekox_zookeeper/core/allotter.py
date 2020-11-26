@@ -7,15 +7,15 @@ from itertools import cycle
 
 
 class Allotter(object):
-    def __init__(self, data=None):
+    def __init__(self, sdepd=None):
         self.iters = {}
-        self.items = data or {}
+        self.sdepd = sdepd
 
     def get(self, name):
-        data = self.items[name]
+        data = self.sdepd.services[name]
         self.iters.setdefault(name, cycle(data))
         return self.iters[name].next()
 
-    def set(self, data):
+    def set(self, sdepd):
         self.iters = {}
-        self.items = data
+        self.sdepd = sdepd
