@@ -17,17 +17,17 @@ from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY, DEFAULT_ZOOKEEPER_
 
 
 class ZooKeeperHelper(Dependency):
-    def __init__(self, dbname, s_ipport=None, s_weight=0, watching=None, allotter=None, **options):
-        self.options = options
+    def __init__(self, dbname, watching=None, allotter=None, coptions=None, roptions=None):
+        self.coptions = coptions
         self.services = {}
         self.instance = None
         self.dbname = dbname
-        self.s_ipport = s_ipport
-        self.s_weight = s_weight
         self.watching = watching
         self.allotter = allotter
+        self.coptions = coptions or {}
+        self.roptions = roptions or {}
         self.callback = lambda children: self.set_zk_service()
-        super(ZooKeeperHelper, self).__init__(dbname, s_ipport, s_weight, watching, allotter, **options)
+        super(ZooKeeperHelper, self).__init__(dbname, watching, allotter, coptions, roptions)
 
     @AsLazyProperty
     def configs(self):
@@ -56,28 +56,28 @@ class ZooKeeperHelper(Dependency):
         self.callback = self.instance.ChildrenWatch(self.watching)(self.callback)
 
     def setup_register(self):
+        r_options = self.roptions.copy()
         host_addr = self.get_host_byname()
-        host_data = {'host': host_addr or '127.0.0.1'}
+        r_options.setdefault('port', 80)
+        r_options.setdefault('weight', 0)
+        r_options.setdefault('address', host_addr or '127.0.0.1')
         serv_name = self.container.service_cls.name
         base_root = DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH
         base_path = '{}/{}.{}'.format(base_root, serv_name, generator_uuid())
         self.instance.ensure_path(base_root)
-        host_info = json.dumps({
-            'weight': self.s_weight,
-            'server': self.s_ipport.format(**host_data)
-        })
+        host_info = json.dumps(r_options)
         self.instance.create(base_path, host_info, ephemeral=True)
 
     def setup(self):
         config = self.configs.get(self.dbname, {}).copy()
-        [config.update({k: v}) for k, v in six.iteritems(self.options)]
+        [config.update({k: v}) for k, v in six.iteritems(self.coptions)]
         self.instance = KazooClient(**config)
         self.watching and self.setup_watching()
-        self.options = config
+        self.coptions = config
 
     def start(self):
         self.instance and self.instance.start()
-        self.s_ipport and self.setup_register()
+        self.watching and self.setup_register()
 
     def stop(self):
         self.instance and self.instance.stop()
