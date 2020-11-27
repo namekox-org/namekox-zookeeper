@@ -39,7 +39,7 @@ class ZooKeeperHelper(Dependency):
 
     def get_serv_name(self, name):
         prefix = '{}/'.format(self.watching)
-        return name.replace(prefix, '').split('.', 1)[0]
+        return name.replace(prefix, '', 1).split('.', 1)[0]
 
     def gen_serv_name(self, name):
         return '{}/{}.{}'.format(self.watching, name, generator_uuid())
