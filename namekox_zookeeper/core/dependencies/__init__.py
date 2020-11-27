@@ -17,7 +17,7 @@ from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY
 
 
 class ZooKeeperHelper(Dependency):
-    def __init__(self, dbname, watching=None, allotter=None, coptions=None, roptions=None):
+    def __init__(self, dbname, serverid=None, watching=None, allotter=None, coptions=None, roptions=None):
         self.coptions = coptions
         self.services = {}
         self.instance = None
@@ -26,7 +26,8 @@ class ZooKeeperHelper(Dependency):
         self.allotter = allotter
         self.coptions = coptions or {}
         self.roptions = roptions or {}
-        super(ZooKeeperHelper, self).__init__(dbname, watching, allotter, coptions, roptions)
+        self.serverid = serverid or generator_uuid()
+        super(ZooKeeperHelper, self).__init__(dbname, serverid, watching, allotter, coptions, roptions)
 
     @AsLazyProperty
     def configs(self):
@@ -38,10 +39,10 @@ class ZooKeeperHelper(Dependency):
         return ignore_exception(socket.gethostbyname)(name)
 
     def get_serv_name(self, name):
-        return name.rsplit('/', 1)[-1]
+        return name.rsplit('/', 1)[-1].split('.', 1)[0]
 
     def gen_serv_name(self, name):
-        return '{}/{}.{}'.format(self.watching, name, generator_uuid())
+        return '{}/{}.{}'.format(self.watching, name, self.serverid)
 
     def update_zookeeper_services(self, c):
         services = {}
