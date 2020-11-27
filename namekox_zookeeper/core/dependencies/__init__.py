@@ -38,8 +38,7 @@ class ZooKeeperHelper(Dependency):
         return ignore_exception(socket.gethostbyname)(name)
 
     def get_serv_name(self, name):
-        prefix = '{}/'.format(self.watching)
-        return name.replace(prefix, '', 1).split('.', 1)[0]
+        return name.rsplit('/', 1)[-1]
 
     def gen_serv_name(self, name):
         return '{}/{}.{}'.format(self.watching, name, generator_uuid())
