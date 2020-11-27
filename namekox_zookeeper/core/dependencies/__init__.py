@@ -26,7 +26,6 @@ class ZooKeeperHelper(Dependency):
         self.allotter = allotter
         self.coptions = coptions or {}
         self.roptions = roptions or {}
-        self.callback = lambda children: self.set_zk_service()
         super(ZooKeeperHelper, self).__init__(dbname, watching, allotter, coptions, roptions)
 
     @AsLazyProperty
@@ -38,22 +37,27 @@ class ZooKeeperHelper(Dependency):
         name = socket.gethostname()
         return ignore_exception(socket.gethostbyname)(name)
 
-    def set_zk_service(self):
-        nservices = {}
-        base_root = DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH
-        for name in self.instance.get_children(base_root):
-            path = '{}/{}'.format(base_root, name)
+    @staticmethod
+    def get_serv_name(name):
+        return name.lstrip(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH).split('.', 1)[0]
+
+    @staticmethod
+    def gen_serv_name(name):
+        return '{}/{}.{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name, generator_uuid())
+
+    def update_zk_service(self, c):
+        services = {}
+        for name in c:
+            path = '{}/{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name)
             data = ignore_exception(json.loads)(self.instance.get(path)[0])
-            name = name.split('.', 1)[0]
-            nservices.setdefault(name, [])
-            if not data or data in nservices[name]:
-                continue
-            nservices[name].append(data)
-        self.services = nservices
+            name = self.get_serv_name(name)
+            services.setdefault(name, [])
+            data and data not in services[name] and services[name].append(data)
+        self.services = services
         self.allotter and self.allotter.set(self)
 
     def setup_watching(self):
-        self.callback = self.instance.ChildrenWatch(self.watching)(self.callback)
+        self.update_zk_service = self.instance.ChildrenWatch(self.watching)(self.update_zk_service)
 
     def setup_register(self):
         r_options = self.roptions.copy()
@@ -61,10 +65,8 @@ class ZooKeeperHelper(Dependency):
         r_options.setdefault('port', 80)
         r_options.setdefault('weight', 0)
         r_options.setdefault('address', host_addr or '127.0.0.1')
-        serv_name = self.container.service_cls.name
-        base_root = DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH
-        base_path = '{}/{}.{}'.format(base_root, serv_name, generator_uuid())
-        self.instance.ensure_path(base_root)
+        self.instance.ensure_path(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH)
+        base_path = self.gen_serv_name(self.container.service_cls.name)
         host_info = json.dumps(r_options)
         self.instance.create(base_path, host_info, ephemeral=True)
 
@@ -72,10 +74,10 @@ class ZooKeeperHelper(Dependency):
         config = self.configs.get(self.dbname, {}).copy()
         [config.update({k: v}) for k, v in six.iteritems(self.coptions)]
         self.instance = KazooClient(**config)
-        self.watching and self.setup_watching()
         self.coptions = config
 
     def start(self):
+        self.watching and self.setup_watching()
         self.instance and self.instance.start()
         self.watching and self.setup_register()
 
