@@ -46,7 +46,7 @@ class ZooKeeperHelper(Dependency):
     def gen_serv_name(name):
         return '{}/{}.{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name, generator_uuid())
 
-    def update_zk_service(self, c):
+    def update_zookeeper_services(self, c):
         services = {}
         for name in c:
             path = '{}/{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name)
@@ -58,7 +58,7 @@ class ZooKeeperHelper(Dependency):
         self.allotter and self.allotter.set(self)
 
     def setup_watching(self):
-        self.update_zk_service = self.instance.ChildrenWatch(self.watching)(self.update_zk_service)
+        self.update_zookeeper_services = self.instance.ChildrenWatch(self.watching)(self.update_zookeeper_services)
 
     def setup_register(self):
         r_options = self.roptions.copy()
