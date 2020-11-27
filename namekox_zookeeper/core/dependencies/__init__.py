@@ -13,7 +13,7 @@ from namekox_core.core.friendly import AsLazyProperty
 from namekox_core.core.generator import generator_uuid
 from namekox_core.core.friendly import ignore_exception
 from namekox_core.core.service.dependency import Dependency
-from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY, DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH
+from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY
 
 
 class ZooKeeperHelper(Dependency):
@@ -37,19 +37,17 @@ class ZooKeeperHelper(Dependency):
         name = socket.gethostname()
         return ignore_exception(socket.gethostbyname)(name)
 
-    @staticmethod
-    def get_serv_name(name):
-        prefix = '{}/'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH)
+    def get_serv_name(self, name):
+        prefix = '{}/'.format(self.watching)
         return name.replace(prefix, '').split('.', 1)[0]
 
-    @staticmethod
-    def gen_serv_name(name):
-        return '{}/{}.{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name, generator_uuid())
+    def gen_serv_name(self, name):
+        return '{}/{}.{}'.format(self.watching, name, generator_uuid())
 
     def update_zookeeper_services(self, c):
         services = {}
         for name in c:
-            path = '{}/{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name)
+            path = '{}/{}'.format(self.watching, name)
             data = ignore_exception(json.loads)(self.instance.get(path)[0])
             name = self.get_serv_name(name)
             data and services.setdefault(name, [])
@@ -65,7 +63,7 @@ class ZooKeeperHelper(Dependency):
         host_addr = self.get_host_byname()
         r_options.setdefault('port', 80)
         r_options.setdefault('address', host_addr or '127.0.0.1')
-        self.instance.ensure_path(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH)
+        self.instance.ensure_path(self.watching)
         base_path = self.gen_serv_name(self.container.service_cls.name)
         host_info = json.dumps(r_options)
         self.instance.create(base_path, host_info, ephemeral=True)
