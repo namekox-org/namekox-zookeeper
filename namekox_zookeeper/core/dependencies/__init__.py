@@ -64,7 +64,6 @@ class ZooKeeperHelper(Dependency):
         r_options = self.roptions.copy()
         host_addr = self.get_host_byname()
         r_options.setdefault('port', 80)
-        r_options.setdefault('weight', 0)
         r_options.setdefault('address', host_addr or '127.0.0.1')
         self.instance.ensure_path(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH)
         base_path = self.gen_serv_name(self.container.service_cls.name)

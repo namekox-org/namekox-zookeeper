@@ -26,7 +26,7 @@ class Ping(object):
     #       allotter=None,
     # https://kazoo.readthedocs.io/en/2.5.0/api/client.html#kazoo.client.KazooClient.__init__ 
     #       coptions=None, 
-    # {'address': '127.0.0.1', 'port': 80, 'weight': 0}
+    # {'address': '127.0.0.1', 'port': 80}
     #       roptions=None
     # )
     zk = ZooKeeperHelper(
@@ -67,7 +67,7 @@ WEBSERVER:
 2020-11-24 16:05:56,386 DEBUG Received response(xid=2): []
 2020-11-24 16:05:56,392 DEBUG Sending request(xid=3): Exists(path='/namekox', watcher=None)
 2020-11-24 16:05:56,393 DEBUG Received response(xid=3): ZnodeStat(czxid=74, mzxid=74, ctime=1606123632647, mtime=1606123632647, version=0, cversion=62, aversion=0, ephemeralOwner=0, dataLength=0, numChildren=0, pzxid=310)
-2020-11-24 16:05:56,398 DEBUG Sending request(xid=4): Create(path='/namekox/ping.e31f59b3-4748-4212-b553-42dfe902cf19', data='{"weight": 0, "address": "127.0.0.1", "port": 80}', acl=[ACL(perms=31, acl_list=['ALL'], id=Id(scheme='world', id='anyone'))], flags=1)
+2020-11-24 16:05:56,398 DEBUG Sending request(xid=4): Create(path='/namekox/ping.e31f59b3-4748-4212-b553-42dfe902cf19', data='{"address": "127.0.0.1", "port": 80}', acl=[ACL(perms=31, acl_list=['ALL'], id=Id(scheme='world', id='anyone'))], flags=1)
 2020-11-24 16:05:56,402 DEBUG Received EVENT: Watch(type=4, state=3, path=u'/namekox')
 2020-11-24 16:05:56,403 DEBUG Received response(xid=4): u'/namekox/ping.e31f59b3-4748-4212-b553-42dfe902cf19'
 2020-11-24 16:05:56,403 DEBUG Sending request(xid=5): GetChildren(path='/namekox', watcher=<bound method ChildrenWatch._watcher of <kazoo.recipe.watchers.ChildrenWatch object at 0x103459150>>)
@@ -77,7 +77,7 @@ WEBSERVER:
 2020-11-24 16:05:56,408 DEBUG Sending request(xid=6): GetChildren(path='/namekox', watcher=None)
 2020-11-24 16:05:56,409 DEBUG Received response(xid=6): [u'ping.e31f59b3-4748-4212-b553-42dfe902cf19']
 2020-11-24 16:05:56,410 DEBUG Sending request(xid=7): GetData(path='/namekox/ping.e31f59b3-4748-4212-b553-42dfe902cf19', watcher=None)
-2020-11-24 16:05:56,410 DEBUG Received response(xid=7): ('{"port": 80, "weight": 0, "address": "127.0.0.1"}', ZnodeStat(czxid=312, mzxid=312, ctime=1606205156399, mtime=1606205156399, version=0, cversion=0, aversion=0, ephemeralOwner=72057605710938198, dataLength=39, numChildren=0, pzxid=312))
+2020-11-24 16:05:56,410 DEBUG Received response(xid=7): ('{"port": 80, "address": "127.0.0.1"}', ZnodeStat(czxid=312, mzxid=312, ctime=1606205156399, mtime=1606205156399, version=0, cversion=0, aversion=0, ephemeralOwner=72057605710938198, dataLength=39, numChildren=0, pzxid=312))
 ```
 > curl http://127.0.0.1/api/assign/server/
 ```json
@@ -86,7 +86,6 @@ WEBSERVER:
     "code": "Request:Success", 
     "data": {
         "port": 80,
-        "weight": 0, 
         "address": "127.0.0.1"
     }, 
     "call_id": "e19a2c8c-09ff-4543-95f7-81bedafb9485"
@@ -119,6 +118,6 @@ In [2]: nx.zookeeper.proxy('ping').get('/namekox/ping.e31f59b3-4748-4212-b553-42
 2020-11-24 16:08:32,540 DEBUG Sending request(xid=None): Connect(protocol_version=0, last_zxid_seen=0, time_out=10000, session_id=0, passwd='\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', read_only=None)
 2020-11-24 16:08:32,542 INFO Zookeeper connection established, state: CONNECTED
 2020-11-24 16:08:32,544 DEBUG Sending request(xid=1): GetData(path='/namekox/ping.e31f59b3-4748-4212-b553-42dfe902cf19', watcher=None)
-2020-11-24 16:08:32,545 DEBUG Received response(xid=1): ('{"weight": 0, "address": "127.0.0.1", "port": 80}', ZnodeStat(czxid=312, mzxid=312, ctime=1606205156399, mtime=1606205156399, version=0, cversion=0, aversion=0, ephemeralOwner=72057605710938198, dataLength=39, numChildren=0, pzxid=312))
-Out[2]: '{"port": 80, "weight": 0, "address": "127.0.0.1"}'
+2020-11-24 16:08:32,545 DEBUG Received response(xid=1): ('{"address": "127.0.0.1", "port": 80}', ZnodeStat(czxid=312, mzxid=312, ctime=1606205156399, mtime=1606205156399, version=0, cversion=0, aversion=0, ephemeralOwner=72057605710938198, dataLength=39, numChildren=0, pzxid=312))
+Out[2]: '{"port": 80, "address": "127.0.0.1"}'
 ```
