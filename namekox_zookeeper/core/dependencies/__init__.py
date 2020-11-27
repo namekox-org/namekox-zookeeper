@@ -52,7 +52,7 @@ class ZooKeeperHelper(Dependency):
             path = '{}/{}'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH, name)
             data = ignore_exception(json.loads)(self.instance.get(path)[0])
             name = self.get_serv_name(name)
-            services.setdefault(name, [])
+            data and services.setdefault(name, [])
             data and data not in services[name] and services[name].append(data)
         self.services = services
         self.allotter and self.allotter.set(self)
