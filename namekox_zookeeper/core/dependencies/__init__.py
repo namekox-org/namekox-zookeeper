@@ -39,7 +39,8 @@ class ZooKeeperHelper(Dependency):
 
     @staticmethod
     def get_serv_name(name):
-        return name.lstrip(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH).split('.', 1)[0]
+        prefix = '{}/'.format(DEFAULT_ZOOKEEPER_SERVICE_ROOT_PATH)
+        return name.replace(prefix, '').split('.', 1)[0]
 
     @staticmethod
     def gen_serv_name(name):

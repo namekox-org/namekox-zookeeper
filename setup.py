@@ -15,7 +15,7 @@ readme = open(os.path.join(curdir, 'README.md'), 'rb', 'utf-8').read()
 
 setup(
     name='namekox-zookeeper',
-    version='0.0.11',
+    version='0.0.12',
     description='namekox zookeeper',
     long_description_content_type='text/markdown',
     long_description=readme,
