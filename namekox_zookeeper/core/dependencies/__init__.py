@@ -3,17 +3,20 @@
 # author: forcemain@163.com
 
 
+import sys
 import six
 import json
 import socket
 
 
+from kazoo.retry import KazooRetry
 from kazoo.client import KazooClient
+from kazoo.protocol.states import KazooState
 from namekox_core.core.friendly import AsLazyProperty
 from namekox_core.core.generator import generator_uuid
 from namekox_core.core.friendly import ignore_exception
 from namekox_core.core.service.dependency import Dependency
-from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY
+from namekox_zookeeper.constants import ZOOKEEPER_CONFIG_KEY, DEFAULT_ZOOKEEPER_SESSION_TIMEOUT
 
 
 class ZooKeeperHelper(Dependency):
@@ -22,6 +25,7 @@ class ZooKeeperHelper(Dependency):
         self.services = {}
         self.instance = None
         self.dbname = dbname
+        self.prestate = None
         self.watching = watching
         self.allotter = allotter
         self.coptions = coptions or {}
@@ -68,10 +72,20 @@ class ZooKeeperHelper(Dependency):
         host_info = json.dumps(r_options)
         self.instance.create(base_path, host_info, ephemeral=True)
 
+    def setup_listener(self, state):
+        if self.prestate == KazooState.LOST and state == KazooState.CONNECTED:
+            self.instance = KazooClient(**self.coptions)
+            self.instance.start()
+            self.setup_register()
+        self.prestate = state
+
     def setup(self):
         config = self.configs.get(self.dbname, {}).copy()
+        config.setdefault('timeout', DEFAULT_ZOOKEEPER_SESSION_TIMEOUT)
+        config.setdefault('connection_retry', KazooRetry(max_tries=sys.maxsize))
         [config.update({k: v}) for k, v in six.iteritems(self.coptions)]
         self.instance = KazooClient(**config)
+        self.instance.add_listener(self.setup_listener)
         self.coptions = config
 
     def start(self):
@@ -80,4 +94,4 @@ class ZooKeeperHelper(Dependency):
         self.watching and self.setup_register()
 
     def stop(self):
-        self.instance and self.instance.stop()
+        self.instance and ignore_exception(self.instance.stop)()
