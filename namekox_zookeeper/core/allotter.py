@@ -9,7 +9,7 @@ from namekox_zookeeper.exceptions import RegServiceNotFound
 
 class Allotter(object):
     def _raise(self, exc, errs=None):
-        raise
+        raise (exc if errs is None else exc(errs))
 
     def __init__(self, sdepd=None):
         self.iters = {}
