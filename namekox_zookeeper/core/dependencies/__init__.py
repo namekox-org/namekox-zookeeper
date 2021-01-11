@@ -46,9 +46,10 @@ class ZooKeeperHelper(Dependency):
     def gen_serv_name(self, name):
         return '{}/{}.{}'.format(self.watching, name, self.serverid)
 
-    def update_zookeeper_services(self, o):
+    def update_zookeeper_services(self, c):
         services = {}
-        for name in o.get():
+        children = c.get() if hasattr(c, 'get') else c
+        for name in children:
             path = '{}/{}'.format(self.watching, name)
             data = ignore_exception(json.loads)(self.instance.get(path)[0])
             name = self.get_serv_name(name)
@@ -59,6 +60,11 @@ class ZooKeeperHelper(Dependency):
 
     def fetch_children(self):
         self.instance.get_children_async(self.watching).rawlink(self.update_zookeeper_services)
+
+    def setup_watching(self):
+        @self.instance.ChildrenWatch(self.watching)
+        def watching(o):
+            self.update_zookeeper_services(o)
 
     def setup_register(self):
         r_options = self.roptions.copy()
@@ -87,6 +93,7 @@ class ZooKeeperHelper(Dependency):
         self.coptions = config
 
     def start(self):
+        self.watching and self.setup_watching()
         self.instance and self.instance.start_async().wait(timeout=15)
         self.watching and self.setup_register()
 
