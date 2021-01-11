@@ -86,11 +86,11 @@ class ZooKeeperHelper(Dependency):
         [config.update({k: v}) for k, v in six.iteritems(self.coptions)]
         self.instance = KazooClient(**config)
         self.instance.add_listener(self.setup_listener)
+        self.instance.start()
         self.coptions = config
 
     def start(self):
         self.watching and self.setup_watching()
-        self.instance and self.instance.start()
         self.watching and self.setup_register()
 
     def stop(self):
