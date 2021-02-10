@@ -11,11 +11,11 @@ from setuptools import find_packages, setup
 
 
 curdir = os.path.abspath(os.path.dirname(__file__))
-readme = open(os.path.join(curdir, 'README.md'), 'rb', 'utf-8').read()
+readme = open(os.path.join(curdir, 'READIT.md'), 'rb', 'utf-8').read()
 
 setup(
     name='namekox-zookeeper',
-    version='0.0.26',
+    version='0.0.27',
     description='namekox zookeeper',
     long_description_content_type='text/markdown',
     long_description=readme,
