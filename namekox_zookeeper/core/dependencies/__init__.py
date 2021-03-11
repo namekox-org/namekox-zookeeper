@@ -63,9 +63,7 @@ class ZooKeeperHelper(Dependency):
         self.instance.get_children_async(self.watching).rawlink(self.update_zookeeper_services)
 
     def setup_watching(self):
-        @self.instance.ChildrenWatch(self.watching)
-        def watching(o):
-            self.update_zookeeper_services(o)
+        self.instance.ChildrenWatch(self.watching)(self.update_zookeeper_services)
 
     def setup_register(self):
         r_options = self.roptions.copy()
